@@ -3,6 +3,7 @@
 import json
 import logging
 import time
+import os
 
 from aide.backend.utils import (
     FunctionSpec,
@@ -29,7 +30,15 @@ OPENAI_TIMEOUT_EXCEPTIONS = (
 @once
 def _setup_openai_client():
     global _client
-    _client = openai.OpenAI(max_retries=0)
+    if os.getenv("AZURE_OPENAI_API_KEY"):
+        _client = openai.AzureOpenAI(
+        api_key=os.getenv("AZURE_OPENAI_API_KEY"),  
+        api_version="2024-12-01-preview",
+        azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+        max_retries=0
+    )
+    else:
+        _client = openai.OpenAI(max_retries=0)
 
 
 def query(
